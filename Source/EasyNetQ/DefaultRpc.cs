@@ -157,11 +157,11 @@ public class DefaultRpc : IRpc
                 var exceptionMessage = "The exception message has not been specified.";
                 if (msg.Properties.HeadersPresent)
                 {
-                    if (msg.Properties.Headers.ContainsKey(IsFaultedKey))
+                    if (msg.Properties.Headers!.ContainsKey(IsFaultedKey))
                         isFaulted = Convert.ToBoolean(msg.Properties.Headers[IsFaultedKey]);
                     if (msg.Properties.Headers.ContainsKey(ExceptionMessageKey))
                         exceptionMessage = Encoding.UTF8.GetString(
-                            (byte[])msg.Properties.Headers[ExceptionMessageKey]
+                            (byte[])msg.Properties.Headers![ExceptionMessageKey]!
                         );
                 }
 
@@ -235,7 +235,7 @@ public class DefaultRpc : IRpc
         TimeSpan expiration,
         byte? priority,
         bool mandatory,
-        IDictionary<string, object>? headers,
+        IDictionary<string, object?>? headers,
         CancellationToken cancellationToken
     )
     {
@@ -246,19 +246,17 @@ public class DefaultRpc : IRpc
             cancellationToken
         ).ConfigureAwait(false);
 
-        var properties = new MessageProperties
-        {
-            ReplyTo = returnQueueName,
-            CorrelationId = correlationId,
-            DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(requestType)
-        };
+        var properties = new MessageProperties()
+            .WithReplyTo(returnQueueName)
+            .WithCorrelationId(correlationId)
+            .WithDeliveryMode(messageDeliveryModeStrategy.GetDeliveryMode(requestType));
 
         if (expiration != Timeout.InfiniteTimeSpan)
-            properties.Expiration = expiration;
+            properties = properties.WithExpiration(expiration);
         if (priority != null)
-            properties.Priority = priority.Value;
+            properties = properties.WithPriority(priority.Value);
         if (headers?.Count > 0)
-            properties.Headers.UnionWith(headers);
+            properties = properties.WithHeaders(headers);
 
         var requestMessage = new Message<TRequest>(request, properties);
         await advancedBus.PublishAsync(exchange, routingKey, mandatory, requestMessage, cancellationToken)
@@ -324,14 +322,11 @@ public class DefaultRpc : IRpc
         {
             var request = requestMessage.Body!;
             var response = await responder(request, cancellationToken).ConfigureAwait(false);
-            var responseMessage = new Message<TResponse>(response)
-            {
-                Properties =
-                {
-                    CorrelationId = requestMessage.Properties.CorrelationId,
-                    DeliveryMode = MessageDeliveryMode.NonPersistent
-                }
-            };
+            var responseProperties = new MessageProperties()
+                .WithCorrelationId(requestMessage.Properties.CorrelationId)
+                .WithDeliveryMode(MessageDeliveryMode.NonPersistent);
+            var responseMessage = new Message<TResponse>(response, responseProperties);
+
             await advancedBus.PublishAsync(
                 exchange,
                 requestMessage.Properties.ReplyTo!,
@@ -342,11 +337,12 @@ public class DefaultRpc : IRpc
         }
         catch (Exception exception)
         {
-            var responseMessage = new Message<TResponse>();
-            responseMessage.Properties.Headers.Add(IsFaultedKey, true);
-            responseMessage.Properties.Headers.Add(ExceptionMessageKey, exception.Message);
-            responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
-            responseMessage.Properties.DeliveryMode = MessageDeliveryMode.NonPersistent;
+            var responseMessageProperties = new MessageProperties()
+                .WithHeader(IsFaultedKey, true)
+                .WithHeader(ExceptionMessageKey, exception.Message)
+                .WithCorrelationId(requestMessage.Properties.CorrelationId)
+                .WithDeliveryMode(MessageDeliveryMode.NonPersistent);
+            var responseMessage = new Message<TResponse>(default, responseMessageProperties);
 
             await advancedBus.PublishAsync(
                 exchange,

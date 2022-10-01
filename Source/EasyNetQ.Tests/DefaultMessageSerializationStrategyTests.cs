@@ -32,10 +32,8 @@ public class DefaultMessageSerializationStrategyTests
         var serializedMessageBody = Encoding.UTF8.GetBytes("Hello world!");
         const string correlationId = "CorrelationId";
 
-        var message = new Message<MyMessage>(new MyMessage())
-        {
-            Properties = { CorrelationId = correlationId }
-        };
+        var message = new Message<MyMessage>(new MyMessage(), new MessageProperties().WithCorrelationId(correlationId));
+
         var serializationStrategy = CreateSerializationStrategy(message, messageType, serializedMessageBody, "SomeOtherCorrelationId");
 
         using var serializedMessage = serializationStrategy.SerializeMessage(message);
@@ -51,15 +49,14 @@ public class DefaultMessageSerializationStrategyTests
         var serializedMessageBody = Encoding.UTF8.GetBytes(messageContent);
         const string correlationId = "CorrelationId";
 
-        var message = new Message<MyMessage>(new MyMessage { Text = messageContent })
-        {
-            Properties =
-            {
-                Type = messageType,
-                CorrelationId = correlationId,
-                UserId = "Bob"
-            },
-        };
+        var message = new Message<MyMessage>(
+            new MyMessage { Text = messageContent },
+            new MessageProperties()
+                .WithType(messageType)
+                .WithCorrelationId(correlationId)
+                .WithUserId("Bob")
+        );
+
         var serializationStrategy = CreateDeserializationStrategy(message, serializedMessageBody, correlationId);
 
         var deserializedMessage = serializationStrategy.DeserializeMessage(message.Properties, serializedMessageBody);
@@ -94,7 +91,7 @@ public class DefaultMessageSerializationStrategyTests
 
         var serializationStrategy = new DefaultMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
 
-        var message = new Message<MyMessage>();
+        var message = new Message<MyMessage>(default);
         using var serializedMessage = serializationStrategy.SerializeMessage(message);
         var deserializedMessage = serializationStrategy.DeserializeMessage(serializedMessage.Properties, serializedMessage.Body);
 

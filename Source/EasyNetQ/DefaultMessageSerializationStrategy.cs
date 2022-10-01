@@ -34,11 +34,10 @@ public class DefaultMessageSerializationStrategy : IMessageSerializationStrategy
         var messageBody = message.GetBody() is null
             ? new ArrayPooledMemoryStream()
             : serializer.MessageToBytes(message.MessageType, message.GetBody()!);
-        var messageProperties = message.Properties;
 
-        messageProperties.Type = typeName;
+        var messageProperties = message.Properties.WithType(typeName);
         if (string.IsNullOrEmpty(messageProperties.CorrelationId))
-            messageProperties.CorrelationId = correlationIdGenerator.GetCorrelationId();
+            messageProperties = messageProperties.WithCorrelationId(correlationIdGenerator.GetCorrelationId());
 
         return new SerializedMessage(messageProperties, messageBody);
     }

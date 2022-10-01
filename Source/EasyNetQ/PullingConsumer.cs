@@ -38,7 +38,7 @@ public interface IPullResult : IDisposable
 public readonly struct PullResult : IPullResult
 {
     private readonly MessageReceivedInfo? receivedInfo;
-    private readonly MessageProperties? properties;
+    private readonly MessageProperties properties;
     private readonly ReadOnlyMemory<byte> body;
     private readonly ulong messagesCount;
     private readonly IDisposable? disposable;
@@ -46,7 +46,7 @@ public readonly struct PullResult : IPullResult
     /// <summary>
     ///     Represents a result when no message is available
     /// </summary>
-    public static PullResult NotAvailable { get; } = new(false, 0, null, null, null, null);
+    public static PullResult NotAvailable { get; } = new(false, 0, null, default, null, null);
 
     /// <summary>
     ///     Represents a result when a message is available
@@ -67,7 +67,7 @@ public readonly struct PullResult : IPullResult
         bool isAvailable,
         ulong messagesCount,
         MessageReceivedInfo? receivedInfo,
-        MessageProperties? properties,
+        MessageProperties properties,
         in ReadOnlyMemory<byte> body,
         IDisposable? disposable
     )
@@ -126,7 +126,7 @@ public readonly struct PullResult : IPullResult
             if (!IsAvailable)
                 throw new InvalidOperationException("No message is available");
 
-            return properties!;
+            return properties;
         }
     }
 
@@ -347,8 +347,7 @@ public class PullingConsumer : IPullingConsumer<PullResult>
             return PullResult.NotAvailable;
 
         var messagesCount = basicGetResult.MessageCount;
-        var messageProperties = new MessageProperties();
-        messageProperties.CopyFrom(basicGetResult.BasicProperties);
+        var messageProperties = new MessageProperties(basicGetResult.BasicProperties);
         var messageReceivedInfo = new MessageReceivedInfo(
             "",
             basicGetResult.DeliveryTag,

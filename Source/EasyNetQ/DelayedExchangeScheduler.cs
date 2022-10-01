@@ -67,10 +67,10 @@ public class DelayedExchangeScheduler : IScheduler
 
         var properties = new MessageProperties();
         if (publishConfiguration.Priority != null)
-            properties.Priority = publishConfiguration.Priority.Value;
+            properties = properties.WithPriority(publishConfiguration.Priority.Value);
         if (publishConfiguration.Headers?.Count > 0)
-            properties.Headers.UnionWith(publishConfiguration.Headers);
-        properties.DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T));
+            properties = properties.WithHeaders(publishConfiguration.Headers);
+        properties = properties.WithDeliveryMode(messageDeliveryModeStrategy.GetDeliveryMode(typeof(T)));
 
         await advancedBus.PublishAsync(
             futureExchange, topic, configuration.MandatoryPublish, new Message<T>(message, properties).WithDelay(delay), cts.Token

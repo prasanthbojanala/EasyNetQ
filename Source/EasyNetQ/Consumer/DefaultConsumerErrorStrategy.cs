@@ -2,7 +2,7 @@ using System;
 using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
+using System.Collections.Immutable;
 using System.Text;
 using EasyNetQ.Logging;
 using EasyNetQ.SystemMessages;
@@ -161,12 +161,10 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
     }
 
     private IMemoryOwner<byte> CreateErrorMessage(
-        MessageReceivedInfo receivedInfo, MessageProperties properties, byte[] body, Exception exception
+        MessageReceivedInfo receivedInfo, in MessageProperties properties, byte[] body, Exception exception
     )
     {
         var messageAsString = errorMessageSerializer.Serialize(body);
-        var patchedProperties = (MessageProperties)properties.Clone();
-        patchedProperties.Headers = PatchHeaders(patchedProperties.Headers);
 
         var error = new Error(
             receivedInfo.RoutingKey,
@@ -175,15 +173,15 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
             exception.ToString(),
             messageAsString,
             DateTime.UtcNow,
-            patchedProperties
+            properties.ReplaceHeaders(PatchHeaders)
         );
 
         return serializer.MessageToBytes(typeof(Error), error);
     }
 
-    private static IDictionary<string, object> PatchHeaders(IDictionary<string, object> headers)
+    private static IReadOnlyDictionary<string, object?>? PatchHeaders(IReadOnlyDictionary<string, object?>? headers)
     {
-        return headers.ToDictionary(
+        return headers?.ToImmutableDictionary(
             kvp => kvp.Key,
             kvp => kvp.Value is byte[] bytes ? Encoding.UTF8.GetString(bytes) : kvp.Value
         );

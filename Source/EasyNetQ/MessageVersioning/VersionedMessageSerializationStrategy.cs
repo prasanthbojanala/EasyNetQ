@@ -30,9 +30,9 @@ public class VersionedMessageSerializationStrategy : IMessageSerializationStrate
             : serializer.MessageToBytes(message.MessageType, message.GetBody()!);
         var messageTypeProperties = MessageTypeProperty.CreateForMessageType(message.MessageType, typeNameSerializer);
         var messageProperties = message.Properties;
-        messageTypeProperties.AppendTo(messageProperties);
+        messageProperties = messageTypeProperties.AppendTo(messageProperties);
         if (string.IsNullOrEmpty(messageProperties.CorrelationId))
-            messageProperties.CorrelationId = correlationIdGenerator.GetCorrelationId();
+            messageProperties = messageProperties.WithCorrelationId(correlationIdGenerator.GetCorrelationId());
         return new SerializedMessage(messageProperties, messageBody);
     }
 

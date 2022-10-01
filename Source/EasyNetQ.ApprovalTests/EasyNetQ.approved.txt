@@ -173,7 +173,7 @@ namespace EasyNetQ
         public void Dispose() { }
         protected void RegisterResponseActions<TResponse>(string correlationId, System.Threading.Tasks.TaskCompletionSource<TResponse> tcs) { }
         public virtual System.Threading.Tasks.Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, System.Action<EasyNetQ.IRequestConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
-        protected virtual System.Threading.Tasks.Task RequestPublishAsync<TRequest>(TRequest request, string routingKey, string returnQueueName, string correlationId, System.TimeSpan expiration, byte? priority, bool mandatory, System.Collections.Generic.IDictionary<string, object>? headers, System.Threading.CancellationToken cancellationToken) { }
+        protected virtual System.Threading.Tasks.Task RequestPublishAsync<TRequest>(TRequest request, string routingKey, string returnQueueName, string correlationId, System.TimeSpan expiration, byte? priority, bool mandatory, System.Collections.Generic.IDictionary<string, object?>? headers, System.Threading.CancellationToken cancellationToken) { }
         public virtual EasyNetQ.Internals.AwaitableDisposable<System.IDisposable> RespondAsync<TRequest, TResponse>(System.Func<TRequest, System.Threading.CancellationToken, System.Threading.Tasks.Task<TResponse>> responder, System.Action<EasyNetQ.IResponderConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
         protected virtual System.Threading.Tasks.Task<string> SubscribeToResponseAsync<TRequest, TResponse>(System.Threading.CancellationToken cancellationToken) { }
         protected readonly struct ResponseAction
@@ -356,7 +356,7 @@ namespace EasyNetQ
     }
     public interface IFuturePublishConfiguration
     {
-        EasyNetQ.IFuturePublishConfiguration WithHeaders(System.Collections.Generic.IDictionary<string, object> headers);
+        EasyNetQ.IFuturePublishConfiguration WithHeaders(System.Collections.Generic.IDictionary<string, object?> headers);
         EasyNetQ.IFuturePublishConfiguration WithPriority(byte priority);
         EasyNetQ.IFuturePublishConfiguration WithTopic(string topic);
     }
@@ -394,7 +394,7 @@ namespace EasyNetQ
     public interface IPublishConfiguration
     {
         EasyNetQ.IPublishConfiguration WithExpires(System.TimeSpan expires);
-        EasyNetQ.IPublishConfiguration WithHeaders(System.Collections.Generic.IDictionary<string, object> headers);
+        EasyNetQ.IPublishConfiguration WithHeaders(System.Collections.Generic.IDictionary<string, object?> headers);
         EasyNetQ.IPublishConfiguration WithPriority(byte priority);
         EasyNetQ.IPublishConfiguration WithTopic(string topic);
     }
@@ -445,7 +445,7 @@ namespace EasyNetQ
     public interface IRequestConfiguration
     {
         EasyNetQ.IRequestConfiguration WithExpiration(System.TimeSpan expiration);
-        EasyNetQ.IRequestConfiguration WithHeaders(System.Collections.Generic.IDictionary<string, object> headers);
+        EasyNetQ.IRequestConfiguration WithHeaders(System.Collections.Generic.IDictionary<string, object?> headers);
         EasyNetQ.IRequestConfiguration WithPriority(byte priority);
         EasyNetQ.IRequestConfiguration WithQueueName(string queueName);
     }
@@ -468,7 +468,7 @@ namespace EasyNetQ
     }
     public interface ISendConfiguration
     {
-        EasyNetQ.ISendConfiguration WithHeaders(System.Collections.Generic.IDictionary<string, object> headers);
+        EasyNetQ.ISendConfiguration WithHeaders(System.Collections.Generic.IDictionary<string, object?> headers);
         EasyNetQ.ISendConfiguration WithPriority(byte priority);
     }
     public interface ISendReceive
@@ -544,39 +544,56 @@ namespace EasyNetQ
         public static EasyNetQ.IMessage CreateInstance(System.Type messageType, object? body) { }
         public static EasyNetQ.IMessage CreateInstance(System.Type messageType, object? body, EasyNetQ.MessageProperties properties) { }
     }
-    public class MessageProperties : System.ICloneable
+    public readonly struct MessageProperties
     {
-        public MessageProperties() { }
-        public string? AppId { get; set; }
+        public string? AppId { get; }
         public bool AppIdPresent { get; }
-        public string? ClusterId { get; set; }
+        public string? ClusterId { get; }
         public bool ClusterIdPresent { get; }
-        public string? ContentEncoding { get; set; }
+        public string? ContentEncoding { get; }
         public bool ContentEncodingPresent { get; }
-        public string? ContentType { get; set; }
+        public string? ContentType { get; }
         public bool ContentTypePresent { get; }
-        public string? CorrelationId { get; set; }
+        public string? CorrelationId { get; }
         public bool CorrelationIdPresent { get; }
-        public byte DeliveryMode { get; set; }
+        public byte DeliveryMode { get; }
         public bool DeliveryModePresent { get; }
-        public System.TimeSpan? Expiration { get; set; }
+        public System.TimeSpan? Expiration { get; }
         public bool ExpirationPresent { get; }
-        public System.Collections.Generic.IDictionary<string, object> Headers { get; set; }
+        public System.Collections.Generic.IReadOnlyDictionary<string, object?>? Headers { get; }
         public bool HeadersPresent { get; }
-        public string? MessageId { get; set; }
+        public string? MessageId { get; }
         public bool MessageIdPresent { get; }
-        public byte Priority { get; set; }
+        public byte Priority { get; }
         public bool PriorityPresent { get; }
-        public string? ReplyTo { get; set; }
+        public string? ReplyTo { get; }
         public bool ReplyToPresent { get; }
-        public long Timestamp { get; set; }
+        public long Timestamp { get; }
         public bool TimestampPresent { get; }
-        public string? Type { get; set; }
+        public string? Type { get; }
         public bool TypePresent { get; }
-        public string? UserId { get; set; }
+        public string? UserId { get; }
         public bool UserIdPresent { get; }
-        public object Clone() { }
         public override string ToString() { }
+    }
+    public static class MessagePropertiesExtensions
+    {
+        public static EasyNetQ.MessageProperties ReplaceHeaders(in this EasyNetQ.MessageProperties source, System.Func<System.Collections.Generic.IReadOnlyDictionary<string, object?>?, System.Collections.Generic.IReadOnlyDictionary<string, object?>?> replaceFunc) { }
+        public static EasyNetQ.MessageProperties WithAppId(in this EasyNetQ.MessageProperties source, string? appId) { }
+        public static EasyNetQ.MessageProperties WithClusterId(in this EasyNetQ.MessageProperties source, string? clusterId) { }
+        public static EasyNetQ.MessageProperties WithContentEncoding(in this EasyNetQ.MessageProperties source, string? contentEncoding) { }
+        public static EasyNetQ.MessageProperties WithContentType(in this EasyNetQ.MessageProperties source, string? contentType) { }
+        public static EasyNetQ.MessageProperties WithCorrelationId(in this EasyNetQ.MessageProperties source, string? correlationId) { }
+        public static EasyNetQ.MessageProperties WithDeliveryMode(in this EasyNetQ.MessageProperties source, byte deliveryMode) { }
+        public static EasyNetQ.MessageProperties WithExpiration(in this EasyNetQ.MessageProperties source, System.TimeSpan? expiration) { }
+        public static EasyNetQ.MessageProperties WithHeader(in this EasyNetQ.MessageProperties source, string key, object? value) { }
+        public static EasyNetQ.MessageProperties WithHeaders(in this EasyNetQ.MessageProperties source, System.Collections.Generic.IDictionary<string, object?> headers) { }
+        public static EasyNetQ.MessageProperties WithMessageId(in this EasyNetQ.MessageProperties source, string? messageId) { }
+        public static EasyNetQ.MessageProperties WithPriority(in this EasyNetQ.MessageProperties source, byte priority) { }
+        public static EasyNetQ.MessageProperties WithReplyTo(in this EasyNetQ.MessageProperties source, string replyTo) { }
+        public static EasyNetQ.MessageProperties WithTimestamp(in this EasyNetQ.MessageProperties source, long timestamp) { }
+        public static EasyNetQ.MessageProperties WithType(in this EasyNetQ.MessageProperties source, string? type) { }
+        public static EasyNetQ.MessageProperties WithUserId(in this EasyNetQ.MessageProperties source, string? userId) { }
     }
     public class MessageReceivedInfo
     {
@@ -605,9 +622,8 @@ namespace EasyNetQ
     }
     public class Message<T> : EasyNetQ.IMessage, EasyNetQ.IMessage<T>
     {
-        public Message() { }
         public Message(T? body) { }
-        public Message(T? body, EasyNetQ.MessageProperties properties) { }
+        public Message(T? body, in EasyNetQ.MessageProperties properties) { }
         public T Body { get; }
         public System.Type MessageType { get; }
         public EasyNetQ.MessageProperties Properties { get; }
@@ -908,7 +924,7 @@ namespace EasyNetQ
     }
     public readonly struct SerializedMessage : System.IDisposable
     {
-        public SerializedMessage(EasyNetQ.MessageProperties properties, System.Buffers.IMemoryOwner<byte> body) { }
+        public SerializedMessage(in EasyNetQ.MessageProperties properties, System.Buffers.IMemoryOwner<byte> body) { }
         public System.ReadOnlyMemory<byte> Body { get; }
         public EasyNetQ.MessageProperties Properties { get; }
         public void Dispose() { }
@@ -1114,7 +1130,7 @@ namespace EasyNetQ.Consumer
     }
     public readonly struct ConsumerExecutionContext
     {
-        public ConsumerExecutionContext(EasyNetQ.Consumer.MessageHandler handler, EasyNetQ.MessageReceivedInfo receivedInfo, EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
+        public ConsumerExecutionContext(EasyNetQ.Consumer.MessageHandler handler, EasyNetQ.MessageReceivedInfo receivedInfo, in EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
         public System.ReadOnlyMemory<byte> Body { get; }
         public EasyNetQ.Consumer.MessageHandler Handler { get; }
         public EasyNetQ.MessageProperties Properties { get; }
@@ -1400,7 +1416,7 @@ namespace EasyNetQ.Events
     }
     public readonly struct DeliveredMessageEvent
     {
-        public DeliveredMessageEvent(EasyNetQ.MessageReceivedInfo info, EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
+        public DeliveredMessageEvent(EasyNetQ.MessageReceivedInfo info, in EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
         public System.ReadOnlyMemory<byte> Body { get; }
         public EasyNetQ.MessageProperties Properties { get; }
         public EasyNetQ.MessageReceivedInfo ReceivedInfo { get; }
@@ -1718,7 +1734,7 @@ namespace EasyNetQ.MessageVersioning
         where T :  class { }
     public class MessageTypeProperty
     {
-        public void AppendTo(EasyNetQ.MessageProperties messageProperties) { }
+        public EasyNetQ.MessageProperties AppendTo(in EasyNetQ.MessageProperties messageProperties) { }
         public System.Type GetMessageType() { }
         public static EasyNetQ.MessageVersioning.MessageTypeProperty CreateForMessageType(System.Type messageType, EasyNetQ.ITypeNameSerializer typeNameSerializer) { }
         public static EasyNetQ.MessageVersioning.MessageTypeProperty ExtractFromProperties(EasyNetQ.MessageProperties messageProperties, EasyNetQ.ITypeNameSerializer typeNameSerializer) { }

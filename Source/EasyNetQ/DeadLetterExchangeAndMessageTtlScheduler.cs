@@ -80,14 +80,14 @@ public class DeadLetterExchangeAndMessageTtlScheduler : IScheduler
 
         await advancedBus.BindAsync(futureExchange, futureQueue, topic, cts.Token).ConfigureAwait(false);
 
-        var properties = new MessageProperties();
+        var advancedMessageProperties = new MessageProperties()
+            .WithDeliveryMode(messageDeliveryModeStrategy.GetDeliveryMode(typeof(T)));
         if (publishConfiguration.Priority != null)
-            properties.Priority = publishConfiguration.Priority.Value;
+            advancedMessageProperties = advancedMessageProperties.WithPriority(publishConfiguration.Priority.Value);
         if (publishConfiguration.Headers?.Count > 0)
-            properties.Headers.UnionWith(publishConfiguration.Headers);
-        properties.DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T));
+            advancedMessageProperties = advancedMessageProperties.WithHeaders(publishConfiguration.Headers);
 
-        var advancedMessage = new Message<T>(message, properties);
+        var advancedMessage = new Message<T>(message, advancedMessageProperties);
         await advancedBus.PublishAsync(
             futureExchange, topic, configuration.MandatoryPublish, advancedMessage, cts.Token
         ).ConfigureAwait(false);

@@ -80,11 +80,7 @@ public class DefaultConsumerErrorStrategyTests
         return new ConsumerExecutionContext(
             (_, _, _, _) => null,
             new MessageReceivedInfo("consumertag", 0, false, "orginalExchange", "originalRoutingKey", "queue"),
-            new MessageProperties
-            {
-                CorrelationId = "123",
-                AppId = "456"
-            },
+            new MessageProperties().WithCorrelationId("123").WithAppId("456"),
             originalMessageBody
         );
     }

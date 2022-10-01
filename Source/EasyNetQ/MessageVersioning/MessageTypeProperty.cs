@@ -37,12 +37,14 @@ public class MessageTypeProperty
             .ToList();
     }
 
-    public void AppendTo(MessageProperties messageProperties)
+    public MessageProperties AppendTo(in MessageProperties messageProperties)
     {
-        messageProperties.Type = firstAlternativeMessageType;
+        var resultProperties = messageProperties.WithType(firstAlternativeMessageType);
 
         if (alternativeTypes.Count > 0)
-            messageProperties.Headers[AlternativeMessageTypesHeaderKey] = string.Join(AlternativeMessageTypeSeparator, alternativeTypes);
+            resultProperties = resultProperties.WithHeader(AlternativeMessageTypesHeaderKey, string.Join(AlternativeMessageTypeSeparator, alternativeTypes));
+
+        return resultProperties;
     }
 
     public Type GetMessageType()
@@ -68,7 +70,7 @@ public class MessageTypeProperty
         if (messageType == null)
             throw new EasyNetQException("Type is empty");
 
-        if (!messageProperties.HeadersPresent || !messageProperties.Headers.ContainsKey(AlternativeMessageTypesHeaderKey))
+        if (!messageProperties.HeadersPresent || !messageProperties.Headers!.ContainsKey(AlternativeMessageTypesHeaderKey))
             return new MessageTypeProperty(typeNameSerializer, messageType, null);
 
         if (messageProperties.Headers[AlternativeMessageTypesHeaderKey] is not byte[] rawHeader)

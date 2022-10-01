@@ -54,10 +54,8 @@ public class When_a_user_handler_is_executed
     private MessageProperties deliveredProperties;
     private MessageReceivedInfo deliveredInfo;
 
-    private readonly MessageProperties messageProperties = new()
-    {
-        CorrelationId = "correlation_id"
-    };
+    private readonly MessageProperties messageProperties = new MessageProperties()
+        .WithCorrelationId("correlation_id");
 
     private readonly MessageReceivedInfo messageInfo = new("consumer_tag", 42, false, "exchange", "routingKey", "queue");
     private readonly byte[] messageBody = Array.Empty<byte>();

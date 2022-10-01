@@ -44,14 +44,7 @@ public class Message<T> : IMessage<T>
         MessageType = body != null ? body.GetType() : typeof(T);
     }
 
-    public Message()
-    {
-        Body = default;
-        Properties = new MessageProperties();
-        MessageType = typeof(T);
-    }
-
-    public Message(T? body, MessageProperties properties)
+    public Message(T? body, in MessageProperties properties)
     {
         Body = body;
         Properties = properties;

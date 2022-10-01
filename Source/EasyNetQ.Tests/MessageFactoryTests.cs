@@ -18,7 +18,7 @@ public class MessageFactoryTests
         Assert.True(genericMessage.MessageType == typeof(MyMessage));
         Assert.True(((Message<MyMessage>)genericMessage).Body.Text == message.Text);
 
-        var properties = new MessageProperties { CorrelationId = Guid.NewGuid().ToString() };
+        var properties = new MessageProperties().WithCorrelationId(Guid.NewGuid().ToString());
         var genericMessageWithProperties = MessageFactory.CreateInstance(typeof(MyMessage), message, properties);
 
         Assert.NotNull(genericMessageWithProperties);

@@ -102,13 +102,9 @@ public class PublishConfirmationListenerTest
     {
         model.NextPublishSeqNo.Returns(DeliveryTag);
         var confirmation1 = publishConfirmationListener.CreatePendingConfirmation(model);
-        var properties = new MessageProperties
-        {
-            Headers =
-            {
-                [MessagePropertiesExtensions.ConfirmationIdHeader] = Encoding.UTF8.GetBytes(confirmation1.Id.ToString())
-            }
-        };
+        var properties = new MessageProperties()
+                .WithHeader(MessagePropertiesExtensions.ConfirmationIdHeader, Encoding.UTF8.GetBytes(confirmation1.Id.ToString()));
+
         eventBus.Publish(
             new ReturnedMessageEvent(
                 model,

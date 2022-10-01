@@ -48,11 +48,7 @@ public class When_using_default_consumer_error_strategy
         consumerExecutionContext = new ConsumerExecutionContext(
             (_, _, _, _) => Task.FromResult(AckStrategies.Ack),
             new MessageReceivedInfo("consumerTag", 0, false, "orginalExchange", "originalRoutingKey", "queue"),
-            new MessageProperties
-            {
-                CorrelationId = string.Empty,
-                AppId = string.Empty
-            },
+            new MessageProperties().WithCorrelationId(string.Empty).WithAppId(string.Empty),
             originalMessageBody
         );
     }
