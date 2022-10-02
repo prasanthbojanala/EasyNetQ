@@ -1,14 +1,22 @@
 using EasyNetQ;
 using EasyNetQ.Topology;
+using Serilog;
 
 var cts = new CancellationTokenSource();
 Console.CancelKeyPress += (_, _) => cts.Cancel();
 
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .MinimumLevel.Debug()
+    .CreateLogger();
+
 using var bus = RabbitHutch.CreateBus(
     "host=localhost;publisherConfirms=True",
-    x => x.EnableNewtonsoftJson()
+    x => x
+        .Register(typeof(ILogger), Log.Logger)
+        .EnableNewtonsoftJson()
         .EnableAlwaysNackWithoutRequeueConsumerErrorStrategy()
-        .EnableConsoleLogger()
+        .EnableSerilogLogging()
 );
 
 var eventQueue = await bus.Advanced.QueueDeclareAsync(

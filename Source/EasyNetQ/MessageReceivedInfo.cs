@@ -3,7 +3,7 @@ namespace EasyNetQ;
 /// <summary>
 ///     Represents various properties of a received message
 /// </summary>
-public class MessageReceivedInfo
+public readonly struct MessageReceivedInfo
 {
     /// <summary>
     ///     Consumer tag

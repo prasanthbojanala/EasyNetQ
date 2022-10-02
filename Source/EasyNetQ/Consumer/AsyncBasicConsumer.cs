@@ -28,7 +28,7 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
     public AsyncBasicConsumer(
         ILogger logger,
         IModel model,
-        Queue queue,
+        in Queue queue,
         bool autoAck,
         IEventBus eventBus,
         IHandlerRunner handlerRunner,
@@ -94,9 +94,7 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
             var context = new ConsumerExecutionContext(
                 messageHandler, messageReceivedInfo, messageProperties, messageBody
             );
-            var ackStrategy = await handlerRunner.InvokeUserMessageHandlerAsync(
-                context, cts.Token
-            ).ConfigureAwait(false);
+            var ackStrategy = await handlerRunner.InvokeMessageHandlerAsync(context, cts.Token).ConfigureAwait(false);
 
             if (!autoAck)
             {
@@ -124,7 +122,7 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
         eventBus.Publish(new ConsumerModelDisposedEvent(ConsumerTags));
     }
 
-    private AckResult Ack(AckStrategy ackStrategy, MessageReceivedInfo receivedInfo)
+    private AckResult Ack(AckStrategy ackStrategy, in MessageReceivedInfo receivedInfo)
     {
         try
         {

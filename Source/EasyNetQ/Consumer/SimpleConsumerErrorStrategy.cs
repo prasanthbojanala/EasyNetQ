@@ -34,8 +34,10 @@ public class SimpleConsumerErrorStrategy : IConsumerErrorStrategy
     }
 
     /// <inheritdoc />
-    public Task<AckStrategy> HandleConsumerErrorAsync(ConsumerExecutionContext context, Exception exception, CancellationToken cancellationToken = default) => Task.FromResult(errorStrategy);
+    public Task<AckStrategy> HandleConsumerErrorAsync(ConsumerExecutionContext context, Exception exception, CancellationToken cancellationToken = default)
+        => Task.FromResult(errorStrategy);
 
     /// <inheritdoc />
-    public Task<AckStrategy> HandleConsumerCancelledAsync(ConsumerExecutionContext context, CancellationToken cancellationToken = default) => Task.FromResult(AckStrategies.NackWithRequeue);
+    public Task<AckStrategy> HandleConsumerCancelledAsync(ConsumerExecutionContext context, CancellationToken cancellationToken = default)
+        => Task.FromResult(AckStrategies.NackWithRequeue);
 }

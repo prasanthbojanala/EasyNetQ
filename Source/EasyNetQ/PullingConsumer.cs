@@ -37,7 +37,7 @@ public interface IPullResult : IDisposable
 /// </summary>
 public readonly struct PullResult : IPullResult
 {
-    private readonly MessageReceivedInfo? receivedInfo;
+    private readonly MessageReceivedInfo receivedInfo;
     private readonly MessageProperties? properties;
     private readonly ReadOnlyMemory<byte> body;
     private readonly ulong messagesCount;
@@ -46,7 +46,7 @@ public readonly struct PullResult : IPullResult
     /// <summary>
     ///     Represents a result when no message is available
     /// </summary>
-    public static PullResult NotAvailable { get; } = new(false, 0, null, null, null, null);
+    public static PullResult NotAvailable { get; } = new(false, 0, default, null, null, null);
 
     /// <summary>
     ///     Represents a result when a message is available
@@ -54,7 +54,7 @@ public readonly struct PullResult : IPullResult
     /// <returns></returns>
     public static PullResult Available(
         ulong messagesCount,
-        MessageReceivedInfo receivedInfo,
+        in MessageReceivedInfo receivedInfo,
         MessageProperties properties,
         in ReadOnlyMemory<byte> body,
         IDisposable? disposable
@@ -66,7 +66,7 @@ public readonly struct PullResult : IPullResult
     private PullResult(
         bool isAvailable,
         ulong messagesCount,
-        MessageReceivedInfo? receivedInfo,
+        in MessageReceivedInfo receivedInfo,
         MessageProperties? properties,
         in ReadOnlyMemory<byte> body,
         IDisposable? disposable
@@ -111,7 +111,7 @@ public readonly struct PullResult : IPullResult
             if (!IsAvailable)
                 throw new InvalidOperationException("No message is available");
 
-            return receivedInfo!;
+            return receivedInfo;
         }
     }
 
@@ -157,21 +157,21 @@ public readonly struct PullResult : IPullResult
 /// </summary>
 public readonly struct PullResult<T> : IPullResult
 {
-    private readonly MessageReceivedInfo? receivedInfo;
+    private readonly MessageReceivedInfo receivedInfo;
     private readonly IMessage<T>? message;
     private readonly ulong messagesCount;
 
     /// <summary>
     ///     Represents a result when no message is available
     /// </summary>
-    public static PullResult<T> NotAvailable { get; } = new(false, 0, null, null);
+    public static PullResult<T> NotAvailable { get; } = new(false, 0, default, null);
 
     /// <summary>
     ///     Represents a result when a message is available
     /// </summary>
     /// <returns></returns>
     public static PullResult<T> Available(
-        ulong messagesCount, MessageReceivedInfo receivedInfo, IMessage<T> message
+        ulong messagesCount, in MessageReceivedInfo receivedInfo, IMessage<T> message
     )
     {
         return new PullResult<T>(true, messagesCount, receivedInfo, message);
@@ -180,7 +180,7 @@ public readonly struct PullResult<T> : IPullResult
     private PullResult(
         bool isAvailable,
         ulong messagesCount,
-        MessageReceivedInfo? receivedInfo,
+        in MessageReceivedInfo receivedInfo,
         IMessage<T>? message
     )
     {
@@ -221,7 +221,7 @@ public readonly struct PullResult<T> : IPullResult
             if (!IsAvailable)
                 throw new InvalidOperationException("No message is available");
 
-            return receivedInfo!;
+            return receivedInfo;
         }
     }
 

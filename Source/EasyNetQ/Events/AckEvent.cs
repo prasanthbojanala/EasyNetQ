@@ -30,7 +30,7 @@ public readonly struct AckEvent
     /// <summary>
     ///     Creates AckEvent
     /// </summary>
-    public AckEvent(MessageReceivedInfo info, MessageProperties properties, in ReadOnlyMemory<byte> body, AckResult ackResult)
+    public AckEvent(in MessageReceivedInfo info, MessageProperties properties, in ReadOnlyMemory<byte> body, AckResult ackResult)
     {
         ReceivedInfo = info;
         Properties = properties;

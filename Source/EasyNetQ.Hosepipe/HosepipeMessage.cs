@@ -8,10 +8,10 @@ public class HosepipeMessage
     public MessageProperties Properties { get; }
     public MessageReceivedInfo Info { get; }
 
-    public HosepipeMessage(string body, MessageProperties properties, MessageReceivedInfo info)
+    public HosepipeMessage(string body, MessageProperties properties, in MessageReceivedInfo info)
     {
         Body = body ?? throw new ArgumentNullException(nameof(body));
         Properties = properties ?? throw new ArgumentNullException(nameof(properties));
-        Info = info ?? throw new ArgumentNullException(nameof(info));
+        Info = info;
     }
 }

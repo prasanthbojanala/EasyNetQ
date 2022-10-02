@@ -32,7 +32,7 @@ public class HandlerCollectionTests
     {
         var handler = handlerCollection.GetHandler<MyMessage>();
 
-        handler(new Message<MyMessage>(new MyMessage()), null, default);
+        handler(new Message<MyMessage>(new MyMessage()), default, default);
         myMessageHandlerExecuted.Should().BeTrue();
     }
 
@@ -41,7 +41,7 @@ public class HandlerCollectionTests
     {
         var handler = handlerCollection.GetHandler<Dog>();
 
-        handler(new Message<Dog>(new Dog()), null, default);
+        handler(new Message<Dog>(new Dog()), default, default);
         animalHandlerExecuted.Should().BeTrue();
     }
 
@@ -59,7 +59,7 @@ public class HandlerCollectionTests
     {
         var handler = handlerCollection.GetHandler(typeof(MyMessage));
 
-        handler(new Message<MyMessage>(new MyMessage()), null, default);
+        handler(new Message<MyMessage>(new MyMessage()), default, default);
         myMessageHandlerExecuted.Should().BeTrue();
     }
 
@@ -68,7 +68,7 @@ public class HandlerCollectionTests
     {
         var handler = handlerCollection.GetHandler(typeof(Dog));
 
-        handler(new Message<Dog>(new Dog()), null, default);
+        handler(new Message<Dog>(new Dog()), default, default);
         animalHandlerExecuted.Should().BeTrue();
     }
 
@@ -78,7 +78,7 @@ public class HandlerCollectionTests
         handlerCollection.ThrowOnNoMatchingHandler = false;
         var handler = handlerCollection.GetHandler<MyOtherMessage>();
 
-        handler(new Message<MyOtherMessage>(new MyOtherMessage()), null, default);
+        handler(new Message<MyOtherMessage>(new MyOtherMessage()), default, default);
         myMessageHandlerExecuted.Should().BeFalse();
         animalHandlerExecuted.Should().BeFalse();
     }

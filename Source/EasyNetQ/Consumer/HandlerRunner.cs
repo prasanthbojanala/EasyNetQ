@@ -8,7 +8,7 @@ namespace EasyNetQ.Consumer;
 /// <inheritdoc />
 public interface IHandlerRunner : IDisposable
 {
-    Task<AckStrategy> InvokeUserMessageHandlerAsync(ConsumerExecutionContext context, CancellationToken cancellationToken = default);
+    Task<AckStrategy> InvokeMessageHandlerAsync(ConsumerExecutionContext context, CancellationToken cancellationToken = default);
 }
 
 /// <inheritdoc />
@@ -24,7 +24,7 @@ public class HandlerRunner : IHandlerRunner
     }
 
     /// <inheritdoc />
-    public virtual async Task<AckStrategy> InvokeUserMessageHandlerAsync(
+    public virtual async Task<AckStrategy> InvokeMessageHandlerAsync(
         ConsumerExecutionContext context, CancellationToken cancellationToken
     )
     {

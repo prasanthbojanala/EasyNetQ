@@ -36,7 +36,7 @@ public class When_a_user_handler_is_executed
             messageBody
         );
 
-        var handlerTask = handlerRunner.InvokeUserMessageHandlerAsync(context, default)
+        var handlerTask = handlerRunner.InvokeMessageHandlerAsync(context, default)
             .ContinueWith(async x =>
             {
                 var ackStrategy = await x;
